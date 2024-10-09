@@ -3,9 +3,6 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Commands/Command.h"
-#include "HttpBackend.h"
-#include "JsonObjectConverter.h"
 #include "HttpBackendBPLibrary.generated.h"
 
 
@@ -32,19 +29,4 @@ class UHttpBackendBPLibrary : public UBlueprintFunctionLibrary
 	GENERATED_UCLASS_BODY()
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Execute Sample function", Keywords = "HTTPBackend sample test testing"), Category = "HTTPBackend")
 	static float HTTPBackendSampleFunction(float Param);
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Set Auth Token", Keywords = "HTTPBackend Token Auth"), Category = "HTTPBackend")
-	static void SetAuth(FString Token);
-
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Int Code", Keywords = "HTTPBackend Token Auth"), Category = "HTTPBackend")
-	static int GetIntCode();
-
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Get Int Code", Keywords = "HTTPBackend Token Auth"), Category = "HTTPBackend")
-	static void SetIntCode(int a);
-	//UFUNCTION(BlueprintCallable, meta = (DisplayName = "Backend GET", Keywords = "HTTPBackend Token Get"), Category = "HTTPBackend")
-	//static void SendGet(UPARAM(ref) CommandGet& Command);
-
-	//UFUNCTION(BlueprintCallable, meta = (DisplayName = "Backend POST", Keywords = "HTTPBackend Token Get"), Category = "HTTPBackend")
-	//static void SendPost(UPARAM(ref) FCommandPost& Command, const FCommandCallback& Callback);
 };

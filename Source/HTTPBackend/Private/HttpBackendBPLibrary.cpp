@@ -2,7 +2,6 @@
 
 #include "HttpBackendBPLibrary.h"
 #include "HttpBackend.h"
-#include "Commands/Command.h"
 
 UHttpBackendBPLibrary::UHttpBackendBPLibrary(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -13,25 +12,6 @@ UHttpBackendBPLibrary::UHttpBackendBPLibrary(const FObjectInitializer& ObjectIni
 float UHttpBackendBPLibrary::HTTPBackendSampleFunction(float Param)
 {
 	return -1;
-}
-
-
-void UHttpBackendBPLibrary::SetAuth(FString Token)
-{
-	if (FModuleManager::Get().IsModuleLoaded("HTTPBackend"))
-	{
-		FHttpBackendModule& Backend = FModuleManager::Get().GetModuleChecked<FHttpBackendModule>("HTTPBackend");
-	}
-}
-
-int UHttpBackendBPLibrary::GetIntCode()
-{
-	return GEngine->GetEngineSubsystem<UHttpBackendSubsystem>()->GetCode();
-}
-
-void UHttpBackendBPLibrary::SetIntCode(int a)
-{
-	GEngine->GetEngineSubsystem<UHttpBackendSubsystem>()->SetCode(a);
 }
 
 

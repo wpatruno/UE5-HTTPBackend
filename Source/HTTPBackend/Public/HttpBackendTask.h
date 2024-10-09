@@ -26,7 +26,6 @@ public:
 	FBackendEvent OnComplete;
 
 	virtual void Activate() override;
-	void OnResponse(FBackendResponse& Response);
 
 	/** Return debug string describing task */
 	virtual FString GetDebugString() const override;
@@ -40,9 +39,6 @@ public:
 
 private:
 	void OnRequestFinish(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Success);
-	void OnRequestFinishTask();
-
-	CommandGet* Command;
 
 	//FBackendSettings Settings;
 	FCommandData Data;
