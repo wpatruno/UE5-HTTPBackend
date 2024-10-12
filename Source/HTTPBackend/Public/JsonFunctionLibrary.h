@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "JsonObjectConverter.h"
+#include "Blueprint/BlueprintExceptionInfo.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "JsonFunctionLibrary.generated.h"
 
