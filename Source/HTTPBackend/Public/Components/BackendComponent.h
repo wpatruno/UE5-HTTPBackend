@@ -5,9 +5,11 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Interfaces/IHttpRequest.h"
+#include "JsonObjectConverter.h"
 #include "BackendComponent.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnHttpRequestComplete, const FBackendResponse&, ResponseContent);
+
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class HTTPBACKEND_API UBackendComponent : public UActorComponent
@@ -34,10 +36,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddAuthorization(const FString& Auth);
 	UFUNCTION(BlueprintCallable)
+	void AddBearerToken(const FString& Token);
+	UFUNCTION(BlueprintCallable)
 	void AddToken(const FString& Token);
 
 	UFUNCTION(BlueprintCallable)
 	void Get(const FString& Path, const TArray<FString>& Parameters, const FOnHttpRequestComplete& Callback);
 	UFUNCTION(BlueprintCallable)
 	void Post(const FString& Path, const TArray<FString>& Parameters, const FString& Input, const FOnHttpRequestComplete& Callback);
+	UFUNCTION(BlueprintCallable)
+	void PostJson(const FString& Path, const TArray<FString>& Parameters, const TMap<FString, FString>& InputJson, const FOnHttpRequestComplete& Callback);
 };

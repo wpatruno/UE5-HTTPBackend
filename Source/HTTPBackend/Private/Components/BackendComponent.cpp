@@ -46,6 +46,11 @@ void UBackendComponent::AddAuthorization(const FString& Auth)
 	AddHeader("Authorization", Auth);
 }
 
+void UBackendComponent::AddBearerToken(const FString& Token)
+{
+	AddHeader("Authorization", "Bearer " + Token);
+}
+
 void UBackendComponent::AddToken(const FString& Token)
 {
 	AddHeader("Token", Token);
@@ -127,4 +132,19 @@ void UBackendComponent::Post(const FString& Path, const TArray<FString>& Paramet
 
 	// Send the request
 	Request->ProcessRequest();
+}
+
+void UBackendComponent::PostJson(const FString& Path, const TArray<FString>& Parameters, const TMap<FString, FString>& InputJson, const FOnHttpRequestComplete& Callback)
+{
+	const TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
+	for (auto Element : InputJson)
+	{
+		JsonObject->SetStringField(Element.Key, Element.Value);
+	}
+
+	FString OutputString;
+	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+
+	Post(Path, Parameters, OutputString, Callback);
 }
