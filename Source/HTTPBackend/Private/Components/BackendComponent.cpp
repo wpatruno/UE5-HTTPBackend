@@ -4,6 +4,7 @@
 #include "Components/BackendComponent.h"
 
 #include "BackendData.h"
+#include "HttpBackendSubsystem.h"
 #include "HttpModule.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
@@ -15,30 +16,15 @@ UBackendComponent::UBackendComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-TSharedRef<IHttpRequest> UBackendComponent::MakeRequest(const FString& Verbose)
+void UBackendComponent::BeginPlay()
 {
-	const TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
-
-	Request->SetVerb(Verbose);
-	Request->SetTimeout(Timeout);
-	for (auto Header : Headers)
-	{
-		Request->SetHeader(Header.Key, Header.Value);
-	}
-
-	return Request;
+	Super::BeginPlay();
+	BackendWrapper = GEngine->GetEngineSubsystem<UHttpBackendSubsystem>()->GetBackend(CompleteURL, Headers);
 }
 
 void UBackendComponent::AddHeader(const FString& Key, FString Value)
 {
-	if (Headers.Contains(Key))
-	{
-		Headers[Key] = Value;
-	}
-	else
-	{
-		Headers.Add(Key, Value);
-	}
+	BackendWrapper->AddHeader(Key, Value);
 }
 
 void UBackendComponent::AddAuthorization(const FString& Auth)
@@ -56,95 +42,20 @@ void UBackendComponent::AddToken(const FString& Token)
 	AddHeader("Token", Token);
 }
 
-void UBackendComponent::Get(const FString& Path, const TArray<FString>& Parameters, const FOnHttpRequestComplete& Callback)
+void UBackendComponent::Get(const FString& Path, const TArray<FString>& Parameters,
+                            const FOnHttpRequestComplete& Callback)
 {
-	const TSharedRef<IHttpRequest> Request = MakeRequest(HttpVerb::NAME_Get); //FHttpModule::Get().CreateRequest();
-
-	FString CompleteUrl = Url + "/" + Path;
-
-	for (auto Param : Parameters)
-	{
-		CompleteUrl += "/" + Param;
-	}
-
-	// Set the URL for the request
-	Request->SetURL(CompleteUrl);
-
-	// Bind the response callback
-	Request->OnProcessRequestComplete().BindLambda(
-		[Callback](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
-		{
-			FBackendResponse ResponseData;
-			if (bWasSuccessful && Response.IsValid())
-			{
-				ResponseData.Success = true;
-				ResponseData.StatusCode = Response.Get()->GetResponseCode();
-				ResponseData.ContentType = Response.Get()->GetContentType();
-				ResponseData.Content = Response.Get()->GetContentAsString();
-				UE_LOG(LogTemp, Warning, TEXT("Response: %s"), *Response.Get()->GetContentAsString());
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Response: error"));
-			}
-			Callback.Execute(ResponseData);
-		});
-
-	// Send the request
-	Request->ProcessRequest();
+	BackendWrapper->Get(Path, Parameters, Callback);
 }
 
-void UBackendComponent::Post(const FString& Path, const TArray<FString>& Parameters, const FString& Input, const FOnHttpRequestComplete& Callback)
+void UBackendComponent::Post(const FString& Path, const TArray<FString>& Parameters, const FString& Input,
+                             const FOnHttpRequestComplete& Callback)
 {
-	const TSharedRef<IHttpRequest> Request = MakeRequest(HttpVerb::NAME_Post);
-
-	FString CompleteUrl = Url + "/" + Path;
-
-	for (auto Param : Parameters)
-	{
-		CompleteUrl += "/" + Param;
-	}
-
-	Request->SetHeader("Content-Type", "application/json");
-	Request->SetContentAsString(Input);
-
-	Request->SetURL(CompleteUrl);
-
-	// Bind the response callback
-	Request->OnProcessRequestComplete().BindLambda(
-		[Callback](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
-		{
-			FBackendResponse ResponseData;
-			if (bWasSuccessful && Response.IsValid())
-			{
-				ResponseData.Success = true;
-				ResponseData.StatusCode = Response.Get()->GetResponseCode();
-				ResponseData.ContentType = Response.Get()->GetContentType();
-				ResponseData.Content = Response.Get()->GetContentAsString();
-				UE_LOG(LogTemp, Warning, TEXT("Response: %s"), *Response.Get()->GetContentAsString());
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Response: error"));
-			}
-			Callback.Execute(ResponseData);
-		});
-
-	// Send the request
-	Request->ProcessRequest();
+	BackendWrapper->Post(Path, Parameters, Input, Callback);
 }
 
-void UBackendComponent::PostJson(const FString& Path, const TArray<FString>& Parameters, const TMap<FString, FString>& InputJson, const FOnHttpRequestComplete& Callback)
+void UBackendComponent::PostJson(const FString& Path, const TArray<FString>& Parameters,
+                                 const TMap<FString, FString>& InputJson, const FOnHttpRequestComplete& Callback)
 {
-	const TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
-	for (auto Element : InputJson)
-	{
-		JsonObject->SetStringField(Element.Key, Element.Value);
-	}
-
-	FString OutputString;
-	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
-	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
-
-	Post(Path, Parameters, OutputString, Callback);
+	BackendWrapper->PostJson(Path, Parameters, InputJson, Callback);
 }

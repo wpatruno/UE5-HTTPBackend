@@ -12,12 +12,8 @@ UCLASS()
 class HTTPBACKEND_API UHttpBackendSubsystem : public UEngineSubsystem
 {
 	GENERATED_BODY()
-	int Value = 8;
 
 public:
-	int GetCode() const;
-	void SetCode(int a);
-
-	//UFUNCTION()
-	//void Get(const FString& Url, const TArray<FString>& Parameters, TFunction<void(FHttpRequestPtr, FHttpResponsePtr, bool)> Callback);
+	UFUNCTION(BlueprintCallable)
+	UBackendWrapper* GetBackend(const FString& InUrl, const TMap<FString, FString>& InHeaders);
 };

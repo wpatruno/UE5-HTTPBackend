@@ -3,33 +3,39 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BackendWrapper.h"
-#include "Components/ActorComponent.h"
-#include "Interfaces/IHttpRequest.h"
-#include "JsonObjectConverter.h"
-#include "BackendComponent.generated.h"
+#include "UObject/Object.h"
+#include "BackendWrapper.generated.h"
 
+struct FBackendResponse;
+class IHttpRequest;
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class HTTPBACKEND_API UBackendComponent : public UActorComponent
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnHttpRequestComplete, const FBackendResponse&, ResponseContent);
+
+DECLARE_DELEGATE_OneParam(FOnHttpRequestCompleteRaw, const FBackendResponse&);
+
+/**
+ * 
+ */
+UCLASS()
+class HTTPBACKEND_API UBackendWrapper : public UObject
 {
 	GENERATED_BODY()
 
-public:
-	// Sets default values for this component's properties
-	UBackendComponent();
-
-	virtual void BeginPlay() override;
+	UBackendWrapper();
 
 protected:
-	UPROPERTY()
-	TObjectPtr<UBackendWrapper> BackendWrapper;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Backend")
-	FString CompleteURL;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Backend")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float Timeout = 300;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TMap<FString, FString> Headers;
 
+
+	TSharedRef<IHttpRequest> MakeRequest(const FString& Verbose);
+
 public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString Url;
+	void Initialise(const FString& Url, const TMap<FString, FString>& Headers = TMap<FString, FString>());
 	UFUNCTION(BlueprintCallable)
 	void AddHeader(const FString& Key, FString Value);
 	UFUNCTION(BlueprintCallable)
@@ -41,6 +47,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Get(const FString& Path, const TArray<FString>& Parameters, const FOnHttpRequestComplete& Callback);
+	UFUNCTION(BlueprintCallable)
+	void SendCommandBP(const FCommandData Data, const FOnHttpRequestComplete& Callback);
+	void SendCommand(const FCommandData& Data, FOnHttpRequestCompleteRaw Callback);
 	UFUNCTION(BlueprintCallable)
 	void Post(const FString& Path, const TArray<FString>& Parameters, const FString& Input,
 	          const FOnHttpRequestComplete& Callback);
