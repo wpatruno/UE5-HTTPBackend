@@ -6,7 +6,6 @@
 #include "BackendWrapper.h"
 #include "Components/ActorComponent.h"
 #include "Interfaces/IHttpRequest.h"
-#include "JsonObjectConverter.h"
 #include "BackendComponent.generated.h"
 
 
